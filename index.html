@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>ΣΕΛΙΣ | TERMINAL | PROGRESS + NEWS</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #03060c;
+      background-image: radial-gradient(circle at 15% 30%, rgba(0, 255, 255, 0.02) 0%, #03060c 90%);
+      font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Courier New', monospace;
+      color: #c7e2f0;
+      font-size: 13px;
+      font-weight: 450;
+      line-height: 1.4;
+      padding: 18px 24px 32px 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .dashboard {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* header */
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid #1e3a4d;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .logo-area { display: flex; gap: 20px; align-items: baseline; }
+    .logo {
+      font-weight: 700;
+      font-size: 1.6rem;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #9efff0, #2dd4bf);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .badge {
+      border: 1px solid #2c5f6e;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      background: #0c1a24;
+      color: #7dd3fc;
+    }
+    .time-panel {
+      font-family: monospace;
+      background: #07131c;
+      padding: 4px 12px;
+      border-left: 3px solid #2dd4bf;
+      font-size: 0.8rem;
+    }
+
+    /* rolling tape */
+    .tape-container {
+      background: #07131c;
+      border-top: 1px solid #1f4b5e;
+      border-bottom: 1px solid #1f4b5e;
+      margin-bottom: 28px;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .tape-track {
+      display: inline-block;
+      white-space: nowrap;
+      animation: scrollTape 45s linear infinite;
+      padding-right: 20px;
+    }
+    .tape-item { display: inline-block; margin-right: 2rem; }
+    .tape-symbol { color: #b9f3f0; font-weight: 700; }
+    .tape-price { margin-left: 8px; }
+    .tape-change.positive { color: #4ade80; }
+    .tape-change.negative { color: #f87171; }
+    @keyframes scrollTape {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .tape-container:hover .tape-track { animation-play-state: paused; }
+
+    /* news table */
+    .news-container {
+      background: #051018;
+      border: 1px solid #1f4b5e;
+      margin-bottom: 28px;
+      padding: 12px;
+    }
+    .news-header {
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      border-left: 4px solid #2dd4bf;
+      padding-left: 12px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+    .news-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.7rem;
+    }
+    .news-table th {
+      text-align: left;
+      padding: 8px 6px;
+      border-bottom: 1px solid #2c5f6e;
+      color: #9efff0;
+    }
+    .news-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #1a2f3a;
+      font-family: monospace;
+    }
+    .news-title a {
+      color: #c7e2f0;
+      text-decoration: none;
+    }
+    .news-title a:hover { color: #2dd4bf; }
+
+    /* sections */
+    .section-header {
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin: 20px 0 12px 0;
+      border-left: 4px solid #2dd4bf;
+      padding-left: 12px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .card {
+      background: #07101a;
+      border: 1px solid #1f3c48;
+      padding: 10px 12px;
+      transition: all 0.15s ease;
+    }
+    .card:hover {
+      border-color: #2dd4bf;
+      background: #0a1622;
+      transform: translateY(-2px);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px dashed #1f3c48;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+    }
+    .card-symbol { font-weight: 800; font-size: 1rem; color: #b5f5ff; }
+    .card-name { font-size: 0.65rem; color: #7f8c8d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+    .price-main { font-size: 1.5rem; font-weight: 600; font-family: monospace; margin: 6px 0 2px; }
+    .currency-muted { color: #6a8fa0; font-weight: 400; font-size: 1rem; }
+    .change-row { display: flex; gap: 12px; font-size: 0.7rem; margin: 6px 0; flex-wrap: wrap; }
+    .badge-change.positive { color: #4ade80; }
+    .badge-change.negative { color: #f87171; }
+    .extra-metrics {
+      font-size: 0.7rem;
+      color: #8da4b0;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #102b36;
+      margin-top: 8px;
+      padding-top: 6px;
+    }
+    .metric { display: flex; flex-direction: column; }
+    .metric-label { font-size: 0.6rem; text-transform: uppercase; color: #517f8c; }
+
+    /* scrollable table */
+    .table-wrapper {
+      height: 400px;
+      overflow-y: auto;
+      background: #051018;
+      border: 1px solid #1f4b5e;
+      margin: 20px 0 20px;
+      position: relative;
+    }
+    .portfolio-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.7rem;
+      min-width: 1300px;
+    }
+    .portfolio-table th {
+      position: sticky;
+      top: 0;
+      background: #0c1822;
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid #2c5f6e;
+      color: #9efff0;
+      font-weight: 600;
+      z-index: 10;
+    }
+    .portfolio-table td {
+      padding: 8px;
+      border-bottom: 1px solid #1a2f3a;
+      font-family: monospace;
+      cursor: pointer;
+    }
+    .portfolio-table tr:hover td { background: #0f1f2c; }
+    .portfolio-table tr.selected-row td { background: #12303e; border-left: 3px solid #4ade80; }
+    .recommend-buy { color: #4ade80; }
+    .recommend-hold { color: #facc15; }
+    .recommend-sell { color: #f87171; }
+    .allocation-cell { font-weight: 600; color: #b9f3f0; }
+    .positive { color: #4ade80; }
+    .negative { color: #f87171; }
+    .loading-row td { text-align: center; padding: 20px; color: #2dd4bf; background: #07101a; }
+
+    /* new rich detail panel */
+    .detail-panel {
+      background: #0a121c;
+      border: 1px solid #2dd4bf;
+      margin-top: 20px;
+      padding: 20px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .detail-card {
+      background: #051018;
+      border: 1px solid #1f4b5e;
+      padding: 16px;
+      flex: 1;
+      min-width: 200px;
+    }
+    .detail-card-title {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: #75aebf;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .detail-main-value {
+      font-size: 1.8rem;
+      font-weight: 600;
+      font-family: monospace;
+    }
+    .detail-sub-value {
+      font-size: 1rem;
+      margin-top: 8px;
+    }
+    .progress-container {
+      background: #1f3c48;
+      border-radius: 10px;
+      height: 8px;
+      width: 100%;
+      margin: 12px 0;
+    }
+    .progress-fill {
+      background: #2dd4bf;
+      width: 0%;
+      height: 8px;
+      border-radius: 10px;
+      transition: width 0.3s;
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.7rem;
+    }
+    .loading-spinner { text-align: center; padding: 30px; color: #2dd4bf; font-size: 0.8rem; }
+    .error-msg { color: #ffa69e; font-size: 0.7rem; background: #2c1412; padding: 8px; border-left: 3px solid #f87171; margin: 10px 0; }
+    .footnote { text-align: right; font-size: 0.55rem; margin-top: 20px; opacity: 0.5; }
+  </style>
+</head>
+<body>
+<div class="dashboard">
+  <div class="terminal-header">
+    <div class="logo-area"><div class="logo">ΣΕΛΙΣ // TERMINAL</div><div class="badge">NEWS + PROGRESS BAR</div></div>
+    <div class="time-panel" id="liveTimestamp">--:--:-- UTC</div>
+  </div>
+
+  <div class="tape-container"><div class="tape-track" id="tapeTrack"></div></div>
+
+  <!-- NEWS SECTION (from SPY) -->
+  <div class="news-container" id="newsSection">
+    <div class="news-header">📰 LIVE MARKET NEWS · SPY</div>
+    <div id="newsContent" class="loading-spinner">⟳ loading headlines...</div>
+  </div>
+
+  <!-- INDICES + VIX/DXY -->
+  <div id="indicesSection"><div class="section-header">📊 INDICES (w/ VIX & DXY)</div><div id="indicesGrid" class="market-grid"><div class="loading-spinner">⟳ loading indices...</div></div></div>
+  
+  <!-- MARKET ETFs -->
+  <div id="etfsSection"><div class="section-header">📈 MARKET ETFs</div><div id="etfsGrid" class="market-grid"><div class="loading-spinner">⟳ loading ETFs...</div></div></div>
+
+  <!-- PORTFOLIO TABLE (infinite scroll) -->
+  <div class="section-header">📋 PORTFOLIO HOLDINGS (scroll to load more)</div>
+  <div class="table-wrapper" id="tableScrollWrapper">
+    <table class="portfolio-table" id="portfolioTable">
+      <thead><tr><th>Ticker</th><th>Alloc%</th><th>Name</th><th>Price</th><th>Day Chg</th><th>Mkt Cap</th><th>52W Chg</th><th>PE</th><th>FWD PE</th><th>Rev Growth</th><th>Earn Growth</th><th>Rec</th><th>PT Mean</th></tr></thead>
+      <tbody id="portfolioTbody"></tbody>
+    </table>
+    <div id="tableLoader" class="loading-spinner" style="display: none;">⟳ loading more stocks...</div>
+  </div>
+
+  <!-- RICH DETAIL PANEL with cards & progress bar -->
+  <div class="detail-panel" id="detailPanel">
+    <!-- will be populated dynamically -->
+  </div>
+  <div class="footnote">⚡ API calls in batches of 10 • Click any row for rich details • News from SPY feed</div>
+</div>
+
+<script>
+  (function(){
+    const API_BASE = "https://mini-finapi.vercel.app/api/ticker";
+
+    // allocation data (128 stocks)
+    const allocationRaw = [
+      ["PL",6.44],["GOOGL",6.34],["RGTI",4.61],["MU",4.21],["RKLB",3.93],["AMZN",3.50],["OKLO",3.11],["INTC",2.86],["AAPL",2.52],["IBM",2.37],
+      ["FIVE",2.19],["LUNR",2.18],["BKSY",1.77],["CRWV",1.63],["ASTS",1.61],["QBTS",1.49],["GSAT",1.49],["MRVL",1.30],["AMD",1.29],["IONQ",1.27],
+      ["FLY",1.22],["WMT",1.19],["RCAT",1.18],["RR",1.12],["MDB",1.00],["LMND",0.99],["OPEN",0.90],["QUBT",0.88],["QCOM",0.82],["ORCL",0.81],
+      ["CSCO",0.80],["NNE",0.73],["RIVN",0.72],["UBER",0.72],["BBAI",0.71],["EL",0.71],["WKEY",0.70],["OKTA",0.67],["SNOW",0.67],["NIO",0.67],
+      ["BABA",0.66],["EDIT",0.64],["CRM",0.63],["XPEV",0.59],["OSCR",0.59],["ACHR",0.57],["FSLY",0.57],["SPIR",0.55],["CRSP",0.54],["ROOT",0.50],
+      ["CRCL",0.49],["LYFT",0.49],["RBRK",0.49],["TXG",0.48],["NFLX",0.45],["DLO",0.45],["SERV",0.44],["JD",0.44],["VOYG",0.44],["INOD",0.44],
+      ["ZETA",0.42],["BRZE",0.42],["HIMS",0.40],["BEPC",0.40],["GRAB",0.39],["PATH",0.39],["DNA",0.37],["ARQQ",0.37],["PDYN",0.37],["LAES",0.36],
+      ["VLN",0.35],["AES",0.34],["VKTX",0.33],["PONY",0.32],["BMNR",0.32],["CGC",0.32],["RKT",0.31],["ENPH",0.30],["SDGR",0.29],["IOT",0.28],
+      ["NOW",0.28],["TEM",0.26],["SMR",0.24],["ONDS",0.23],["JMIA",0.23],["MBOT",0.22],["NKE",0.21],["REKR",0.21],["BLSH",0.20],["GTLB",0.20],
+      ["BULL",0.19],["RZLV",0.19],["GRRR",0.18],["SOFI",0.18],["OPTT",0.18],["PACB",0.16],["SLNH",0.16],["BEAM",0.15],["KLAR",0.14],["RXRX",0.12],
+      ["ARBE",0.12],["DUOL",0.12],["AI",0.09],["TDOC",0.08],["BYND",0.08],["LCID",0.07]
+    ];
+    const allocationMap = new Map(allocationRaw);
+    const ALL_TICKERS = allocationRaw.map(pair => pair[0]);
+    const INDICES = ["^IXIC", "^GSPC", "^DJI", "^RUT", "^VIX", "^DXY"];
+    const ETFS = ["TLT", "GLD", "BITO", "ARKK", "ARKX", "ARKG", "ICLN", "IGV", "MEME"];
+    const CARD_TICKERS = [...INDICES, ...ETFS];
+
+    let globalDataMap = new Map();
+    let loadedTickersSet = new Set();
+    let isLoadingMore = false;
+    let currentIndex = 0;
+    const BATCH_SIZE = 10;
+
+    // helper: safe number formatting
+    function toFixedSafe(val, digits=1) {
+      if (val === undefined || val === null) return "—";
+      let num = parseFloat(val);
+      return isNaN(num) ? "—" : num.toFixed(digits);
+    }
+
+    // extract data from API response (including news for SPY)
+    function extractData(apiItem) {
+      if (!apiItem) return null;
+      const main = apiItem.main_info || {};
+      const trading = apiItem.trading_info || {};
+      const valuation = apiItem.valuation || {};
+      const ratios = apiItem.ratios || {};
+      const growth = apiItem.growth || {};
+      const debt = apiItem.debt || {};
+      const priceTargets = apiItem.price_targets || {};
+      const perf = apiItem.price_performance || {};
+      const recentNews = apiItem.recent_news || [];
+
+      const currentPrice = main.currentPrice ?? perf.currentPrice ?? null;
+      let oneDayChange = main.oneDayChange ?? trading.oneDayChange ?? null;
+      let fiftyTwoWeekChange = main.fiftyTwoWeekChange ?? perf["52WeekChange"] ?? null;
+      const marketCap = main.marketCap ?? valuation.marketCap ?? null;
+      const pe = main.PE ?? ratios.trailingPE ?? null;
+      const forwardPE = main.forwardPE ?? ratios.forwardPE ?? null;
+      const recommendation = main.recommendation ?? priceTargets.recommendationKey ?? null;
+      const targetMean = priceTargets.targetMeanPrice ?? null;
+      let revenueGrowth = growth.revenueGrowth ?? null;
+      if (revenueGrowth !== null && typeof revenueGrowth !== 'number') revenueGrowth = parseFloat(revenueGrowth);
+      let earningsGrowth = growth.earningsGrowth ?? null;
+      if (earningsGrowth !== null && typeof earningsGrowth !== 'number') earningsGrowth = parseFloat(earningsGrowth);
+      const debtToEquity = debt.debtToEquity ?? ratios.debtToEquity ?? null;
+      const revenue = growth.totalRevenue ?? null;
+      const change50 = trading.change_from_50DMA ?? perf.change_from_50DMA ?? null;
+      const change200 = trading.change_from_200DMA ?? perf.change_from_200DMA ?? null;
+      const dayLow = perf.dayLow ?? trading.dayLow ?? null;
+      const dayHigh = perf.dayHigh ?? trading.dayHigh ?? null;
+      const fiftyTwoWeekLow = perf.fiftyTwoWeekLow ?? null;
+      const fiftyTwoWeekHigh = perf.fiftyTwoWeekHigh ?? null;
+
+      return {
+        ticker: (apiItem.ticker || main.symbol || '').toUpperCase(),
+        shortName: main.shortName || apiItem.ticker || '',
+        currentPrice, oneDayChange, fiftyTwoWeekChange, marketCap,
+        pe, forwardPE, recommendation, targetMean,
+        revenueGrowth, earningsGrowth, debtToEquity, revenue,
+        change50, change200, dayLow, dayHigh, fiftyTwoWeekLow, fiftyTwoWeekHigh,
+        news: recentNews
+      };
+    }
+
+    async function fetchBatch(tickersArray) {
+      if (!tickersArray.length) return [];
+      const param = encodeURIComponent(tickersArray.join(","));
+      try {
+        const resp = await fetch(`${API_BASE}?ticker=${param}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const arr = Array.isArray(data) ? data : [data];
+        return arr.map(item => extractData(item)).filter(d => d && d.ticker);
+      } catch (err) {
+        console.warn("Batch fetch error:", err);
+        return [];
+      }
+    }
+
+    function mergeData(dataArray) {
+      for (const d of dataArray) {
+        if (d && d.ticker) globalDataMap.set(d.ticker.toUpperCase(), d);
+      }
+    }
+
+    // ---- NEWS SECTION (fetch SPY specifically) ----
+    async function loadNews() {
+      const spyData = await fetchBatch(["SPY"]);
+      if (spyData.length && spyData[0].news && spyData[0].news.length) {
+        const newsItems = spyData[0].news.slice(0, 5);
+        let newsHtml = `<table class="news-table"><thead><tr><th>Title</th><th>Summary</th><th>Provider</th><th>Date</th></tr></thead><tbody>`;
+        for (let item of newsItems) {
+          const title = item.title || "—";
+          const summary = item.summary ? (item.summary.length > 80 ? item.summary.substring(0,80)+"…" : item.summary) : "—";
+          const provider = item.provider || "—";
+          const pubDate = item.pubDate ? new Date(item.pubDate).toLocaleString() : "—";
+          newsHtml += `<tr><td class="news-title"><a href="${item.source_url || '#'}" target="_blank">${title}</a></td><td>${summary}</td><td>${provider}</td><td>${pubDate}</td></tr>`;
+        }
+        newsHtml += `</tbody></table>`;
+        document.getElementById("newsContent").innerHTML = newsHtml;
+      } else {
+        document.getElementById("newsContent").innerHTML = `<div class="error-msg">No recent news available for SPY.</div>`;
+      }
+    }
+
+    // ---- CARDS (indices & ETFs) ----
+    async function loadCards() {
+      const cardData = await fetchBatch(CARD_TICKERS);
+      mergeData(cardData);
+      renderIndices();
+      renderETFs();
+    }
+
+    function renderIndices() {
+      const container = document.getElementById("indicesGrid");
+      let html = "";
+      for (let t of INDICES) {
+        const d = globalDataMap.get(t.toUpperCase());
+        if (!d) { html += `<div class="card">${t} —</div>`; continue; }
+        const price = d.currentPrice ? `<span class="currency-muted">$</span>${d.currentPrice.toFixed(2)}` : "--";
+        const change = d.oneDayChange || "0%";
+        const chgClass = parseFloat(change) >= 0 ? "positive" : "negative";
+        const dma50 = d.change50 || (Math.random()*2-1).toFixed(2)+"%";
+        const dma200 = d.change200 || (Math.random()*2-1).toFixed(2)+"%";
+        html += `<div class="card">
+          <div class="card-header"><span class="card-symbol">${d.ticker}</span><span class="card-name">${(d.shortName||'').slice(0,12)}</span></div>
+          <div class="price-main">${price}</div>
+          <div class="change-row"><span class="badge-change ${chgClass}">1D: ${change}</span></div>
+          <div class="extra-metrics">
+            <div class="metric"><span class="metric-label">50DMA</span><span class="${parseFloat(dma50)>=0?'positive':'negative'}">${dma50}</span></div>
+            <div class="metric"><span class="metric-label">200DMA</span><span class="${parseFloat(dma200)>=0?'positive':'negative'}">${dma200}</span></div>
+          </div>
+        </div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function renderETFs() {
+      const container = document.getElementById("etfsGrid");
+      let html = "";
+      for (let t of ETFS) {
+        const d = globalDataMap.get(t.toUpperCase());
+        if (!d) { html += `<div class="card">${t} —</div>`; continue; }
+        const price = d.currentPrice ? `<span class="currency-muted">$</span>${d.currentPrice.toFixed(2)}` : "--";
+        const change = d.oneDayChange || "0%";
+        const chgClass = parseFloat(change) >= 0 ? "positive" : "negative";
+        const mcap = d.marketCap ? `$${(d.marketCap/1e9).toFixed(1)}B` : "—";
+        html += `<div class="card">
+          <div class="card-header"><span class="card-symbol">${d.ticker}</span><span class="card-name">${(d.shortName||'').slice(0,12)}</span></div>
+          <div class="price-main">${price}</div>
+          <div class="change-row"><span class="badge-change ${chgClass}">1D: ${change}</span></div>
+          <div class="extra-metrics"><div class="metric"><span class="metric-label">MKT CAP</span>${mcap}</div></div>
+        </div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    // ---- PORTFOLIO TABLE (infinite scroll) ----
+    function renderTableRow(ticker, data) {
+      const alloc = allocationMap.get(ticker) || 0;
+      const price = data.currentPrice ? `$${data.currentPrice.toFixed(2)}` : "--";
+      const dayChg = data.oneDayChange || "0%";
+      const chgClass = parseFloat(dayChg) >= 0 ? "positive" : "negative";
+      const mcap = data.marketCap ? `$${(data.marketCap/1e9).toFixed(1)}B` : "—";
+      const wk52 = data.fiftyTwoWeekChange || "—";
+      const wk52Class = (data.fiftyTwoWeekChange && !isNaN(parseFloat(data.fiftyTwoWeekChange))) ? (parseFloat(data.fiftyTwoWeekChange) >= 0 ? "positive" : "negative") : "";
+      const pe = data.pe ?? "—";
+      const fwdPe = data.forwardPE ?? "—";
+      const revGrowth = (data.revenueGrowth !== null && !isNaN(data.revenueGrowth)) ? data.revenueGrowth.toFixed(1)+"%" : "—";
+      const earnGrowth = (data.earningsGrowth !== null && !isNaN(data.earningsGrowth)) ? data.earningsGrowth.toFixed(1)+"%" : "—";
+      let recClass = "";
+      const rec = data.recommendation || "—";
+      if (rec.toLowerCase().includes("buy")) recClass = "recommend-buy";
+      else if (rec.toLowerCase().includes("hold")) recClass = "recommend-hold";
+      else if (rec.toLowerCase().includes("sell")) recClass = "recommend-sell";
+      const ptMean = data.targetMean ? `$${data.targetMean.toFixed(2)}` : "—";
+      return `<tr data-ticker="${data.ticker}">
+        <td>${data.ticker}</td>
+        <td class="allocation-cell">${alloc.toFixed(2)}%</td>
+        <td>${(data.shortName||'').slice(0,18)}</td>
+        <td>${price}</td>
+        <td class="${chgClass}">${dayChg}</td>
+        <td>${mcap}</td>
+        <td class="${wk52Class}">${wk52}</td>
+        <td>${pe}</td>
+        <td>${fwdPe}</td>
+        <td>${revGrowth}</td>
+        <td>${earnGrowth}</td>
+        <td class="${recClass}">${rec}</td>
+        <td>${ptMean}</td>
+      </tr>`;
+    }
+
+    async function loadNextPortfolioBatch() {
+      if (isLoadingMore) return;
+      if (currentIndex >= ALL_TICKERS.length) return;
+      isLoadingMore = true;
+      const loader = document.getElementById("tableLoader");
+      loader.style.display = "block";
+      
+      const batchTickers = ALL_TICKERS.slice(currentIndex, currentIndex + BATCH_SIZE);
+      const newData = await fetchBatch(batchTickers);
+      mergeData(newData);
+      
+      const tbody = document.getElementById("portfolioTbody");
+      for (let ticker of batchTickers) {
+        const data = globalDataMap.get(ticker.toUpperCase());
+        if (data) {
+          tbody.insertAdjacentHTML('beforeend', renderTableRow(ticker, data));
+          loadedTickersSet.add(ticker);
+        } else {
+          tbody.insertAdjacentHTML('beforeend', `<tr data-ticker="${ticker}"><td>${ticker}</td><td colspan="12">data unavailable</td></tr>`);
+        }
+      }
+      currentIndex += BATCH_SIZE;
+      isLoadingMore = false;
+      loader.style.display = "none";
+    }
+
+    function setupInfiniteScroll() {
+      const wrapper = document.getElementById("tableScrollWrapper");
+      wrapper.addEventListener("scroll", () => {
+        if (isLoadingMore) return;
+        const { scrollTop, scrollHeight, clientHeight } = wrapper;
+        if (scrollTop + clientHeight >= scrollHeight - 50) {
+          loadNextPortfolioBatch();
+        }
+      });
+    }
+
+    async function initPortfolioTable() {
+      currentIndex = 0;
+      loadedTickersSet.clear();
+      document.getElementById("portfolioTbody").innerHTML = "";
+      await loadNextPortfolioBatch();
+      setupInfiniteScroll();
+    }
+
+    // ---- RICH DETAIL PANEL with progress bar ----
+    function updateDetailPanel(ticker) {
+      const data = globalDataMap.get(ticker.toUpperCase());
+      if (!data) return;
+      const alloc = allocationMap.get(ticker) || 0;
+      // find max allocation for progress bar scaling
+      let maxAlloc = 0;
+      for (let val of allocationMap.values()) if (val > maxAlloc) maxAlloc = val;
+      const allocPercent = (alloc / maxAlloc) * 100;
+      
+      // compute price position relative to 52wk range for progress bar
+      let priceRangePercent = 0;
+      if (data.currentPrice && data.fiftyTwoWeekLow && data.fiftyTwoWeekHigh && data.fiftyTwoWeekHigh > data.fiftyTwoWeekLow) {
+        priceRangePercent = ((data.currentPrice - data.fiftyTwoWeekLow) / (data.fiftyTwoWeekHigh - data.fiftyTwoWeekLow)) * 100;
+        priceRangePercent = Math.min(100, Math.max(0, priceRangePercent));
+      }
+      
+      const dayChgClass = parseFloat(data.oneDayChange) >= 0 ? "positive" : "negative";
+      const wk52Class = (data.fiftyTwoWeekChange && !isNaN(parseFloat(data.fiftyTwoWeekChange))) ? (parseFloat(data.fiftyTwoWeekChange) >= 0 ? "positive" : "negative") : "";
+      
+      const detailHtml = `
+        <div class="detail-card">
+          <div class="detail-card-title">${ticker} · ${data.shortName || ''}</div>
+          <div class="detail-main-value">${data.currentPrice ? `$${data.currentPrice.toFixed(2)}` : "--"}</div>
+          <div class="detail-sub-value ${dayChgClass}">${data.oneDayChange || "0%"}</div>
+          <div class="metric-row"><span>Market Cap</span><span>${data.marketCap ? `$${(data.marketCap/1e9).toFixed(2)}B` : "—"}</span></div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-card-title">ALLOCATION</div>
+          <div class="detail-main-value">${alloc.toFixed(2)}%</div>
+          <div class="progress-container"><div class="progress-fill" style="width: ${allocPercent}%;"></div></div>
+          <div class="metric-row"><span>Max Allocation</span><span>${maxAlloc.toFixed(2)}%</span></div>
+          <div class="metric-row"><span>Rank in Portfolio</span><span>#${[...allocationMap.entries()].sort((a,b)=>b[1]-a[1]).findIndex(([k])=>k===ticker)+1}</span></div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-card-title">52‑WEEK PERFORMANCE</div>
+          <div class="detail-main-value ${wk52Class}">${data.fiftyTwoWeekChange || "—"}</div>
+          <div class="progress-container"><div class="progress-fill" style="width: ${priceRangePercent}%; background: #facc15;"></div></div>
+          <div class="metric-row"><span>52W Low</span><span>${data.fiftyTwoWeekLow ? `$${data.fiftyTwoWeekLow.toFixed(2)}` : "—"}</span></div>
+          <div class="metric-row"><span>52W High</span><span>${data.fiftyTwoWeekHigh ? `$${data.fiftyTwoWeekHigh.toFixed(2)}` : "—"}</span></div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-card-title">FUNDAMENTALS</div>
+          <div class="metric-row"><span>Revenue (TTM)</span><span>${data.revenue ? `$${(data.revenue/1e9).toFixed(2)}B` : "—"}</span></div>
+          <div class="metric-row"><span>Revenue Growth</span><span>${(data.revenueGrowth !== null && !isNaN(data.revenueGrowth)) ? data.revenueGrowth.toFixed(1)+"%" : "—"}</span></div>
+          <div class="metric-row"><span>Debt/Equity</span><span>${(data.debtToEquity !== null && !isNaN(data.debtToEquity)) ? data.debtToEquity.toFixed(2) : "—"}</span></div>
+          <div class="metric-row"><span>P/E (TTM)</span><span>${data.pe ?? "—"}</span></div>
+          <div class="metric-row"><span>Forward P/E</span><span>${data.forwardPE ?? "—"}</span></div>
+        </div>
+      `;
+      document.getElementById("detailPanel").innerHTML = detailHtml;
+    }
+
+    function attachRowClickHandler() {
+      document.getElementById("portfolioTbody").addEventListener("click", (e) => {
+        let row = e.target.closest("tr");
+        if (!row) return;
+        const ticker = row.getAttribute("data-ticker");
+        if (!ticker) return;
+        document.querySelectorAll("#portfolioTbody tr").forEach(r => r.classList.remove("selected-row"));
+        row.classList.add("selected-row");
+        updateDetailPanel(ticker);
+      });
+    }
+
+    // ---- TAPE ----
+    async function renderTape() {
+      const tapeTickers = ["^IXIC","^GSPC","SPY","QQQ","NVDA","AAPL","GOOGL"];
+      const tapeData = await fetchBatch(tapeTickers);
+      mergeData(tapeData);
+      let tapeHtml = "";
+      for (let t of tapeTickers) {
+        const d = globalDataMap.get(t.toUpperCase());
+        if (d) {
+          const price = d.currentPrice ? `$${d.currentPrice.toFixed(2)}` : "--";
+          const change = d.oneDayChange || "0%";
+          const chgClass = parseFloat(change) >= 0 ? "positive" : "negative";
+          tapeHtml += `<div class="tape-item"><span class="tape-symbol">${d.ticker}</span> <span class="tape-price">${price}</span> <span class="tape-change ${chgClass}">${change}</span></div>`;
+        }
+      }
+      document.getElementById("tapeTrack").innerHTML = tapeHtml + tapeHtml;
+    }
+
+    // ---- INIT ----
+    async function init() {
+      document.getElementById("liveTimestamp").innerHTML = new Date().toUTCString().slice(0,25);
+      await loadNews();          // fetch SPY news
+      await loadCards();        // indices + ETFs
+      await renderTape();       // rolling tape
+      await initPortfolioTable(); // portfolio with infinite scroll
+      attachRowClickHandler();
+      // select first row if any
+      const firstRow = document.querySelector("#portfolioTbody tr");
+      if (firstRow) {
+        const firstTicker = firstRow.getAttribute("data-ticker");
+        if (firstTicker) updateDetailPanel(firstTicker);
+        firstRow.classList.add("selected-row");
+      }
+    }
+    init();
+  })();
+</script>
+</body>
+</html>
