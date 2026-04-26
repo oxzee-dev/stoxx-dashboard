@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>ΣΕΛΙΣ | TERMINAL | PROGRESS + NEWS</title>
+  <title>ΣΕΛΙΣ | TERMINAL | FIXED TABLE + LOAD MORE</title>
   <style>
     * {
       margin: 0;
@@ -28,7 +28,6 @@
       margin: 0 auto;
     }
 
-    /* header */
     .terminal-header {
       display: flex;
       justify-content: space-between;
@@ -92,45 +91,43 @@
     }
     .tape-container:hover .tape-track { animation-play-state: paused; }
 
-    /* news table */
+    /* NEWS – extremely condensed, simple lines */
     .news-container {
       background: #051018;
       border: 1px solid #1f4b5e;
       margin-bottom: 28px;
-      padding: 12px;
+      padding: 6px 10px;
     }
     .news-header {
       font-weight: 600;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
-      border-left: 4px solid #2dd4bf;
-      padding-left: 12px;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-    }
-    .news-table {
-      width: 100%;
-      border-collapse: collapse;
       font-size: 0.7rem;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      color: #75aebf;
     }
-    .news-table th {
-      text-align: left;
-      padding: 8px 6px;
-      border-bottom: 1px solid #2c5f6e;
-      color: #9efff0;
-    }
-    .news-table td {
-      padding: 8px 6px;
+    .news-line {
+      font-size: 0.65rem;
       border-bottom: 1px solid #1a2f3a;
-      font-family: monospace;
+      padding: 4px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: baseline;
     }
-    .news-title a {
-      color: #c7e2f0;
+    .news-line a {
+      color: #9efff0;
       text-decoration: none;
     }
-    .news-title a:hover { color: #2dd4bf; }
+    .news-line a:hover { color: #2dd4bf; }
+    .news-provider { color: #517f8c; }
+    .news-date { color: #3a6e7a; margin-left: auto; }
+    .news-summary {
+      width: 100%;
+      color: #8da4b0;
+      font-size: 0.6rem;
+      margin-top: 2px;
+    }
 
-    /* sections */
     .section-header {
       font-weight: 600;
       letter-spacing: 1px;
@@ -184,14 +181,13 @@
     .metric { display: flex; flex-direction: column; }
     .metric-label { font-size: 0.6rem; text-transform: uppercase; color: #517f8c; }
 
-    /* scrollable table */
+    /* FIXED HEIGHT + SCROLLABLE TABLE */
     .table-wrapper {
       height: 400px;
       overflow-y: auto;
       background: #051018;
       border: 1px solid #1f4b5e;
       margin: 20px 0 20px;
-      position: relative;
     }
     .portfolio-table {
       width: 100%;
@@ -224,9 +220,36 @@
     .allocation-cell { font-weight: 600; color: #b9f3f0; }
     .positive { color: #4ade80; }
     .negative { color: #f87171; }
-    .loading-row td { text-align: center; padding: 20px; color: #2dd4bf; background: #07101a; }
 
-    /* new rich detail panel */
+    /* WIDE & SMOOTH LOAD MORE BUTTON */
+    .load-more-btn {
+      background: #0f2838;
+      border: 1px solid #2c5f6e;
+      color: #b9f3f0;
+      padding: 10px 24px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0 auto 20px auto;
+      display: block;
+      width: 260px;
+      text-align: center;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+    .load-more-btn:hover {
+      background: #1f4b60;
+      border-color: #2dd4bf;
+      transform: scale(1.02);
+    }
+    .load-more-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* detail panel */
     .detail-panel {
       background: #0a121c;
       border: 1px solid #2dd4bf;
@@ -255,10 +278,7 @@
       font-weight: 600;
       font-family: monospace;
     }
-    .detail-sub-value {
-      font-size: 1rem;
-      margin-top: 8px;
-    }
+    .detail-sub-value { font-size: 1rem; margin-top: 8px; }
     .progress-container {
       background: #1f3c48;
       border-radius: 10px;
@@ -287,16 +307,16 @@
 <body>
 <div class="dashboard">
   <div class="terminal-header">
-    <div class="logo-area"><div class="logo">ΣΕΛΙΣ // TERMINAL</div><div class="badge">NEWS + PROGRESS BAR</div></div>
+    <div class="logo-area"><div class="logo">ΣΕΛΙΣ // TERMINAL</div><div class="badge">FIXED TABLE • LOAD MORE</div></div>
     <div class="time-panel" id="liveTimestamp">--:--:-- UTC</div>
   </div>
 
   <div class="tape-container"><div class="tape-track" id="tapeTrack"></div></div>
 
-  <!-- NEWS SECTION (from SPY) -->
+  <!-- ULTRA CONDENSED NEWS (no cards, minimal padding) -->
   <div class="news-container" id="newsSection">
-    <div class="news-header">📰 LIVE MARKET NEWS · SPY</div>
-    <div id="newsContent" class="loading-spinner">⟳ loading headlines...</div>
+    <div class="news-header">📰 ^IXIC · RAW NEWS FEED</div>
+    <div id="newsContent" class="loading-spinner" style="padding: 12px;">⟳ loading headlines...</div>
   </div>
 
   <!-- INDICES + VIX/DXY -->
@@ -305,21 +325,21 @@
   <!-- MARKET ETFs -->
   <div id="etfsSection"><div class="section-header">📈 MARKET ETFs</div><div id="etfsGrid" class="market-grid"><div class="loading-spinner">⟳ loading ETFs...</div></div></div>
 
-  <!-- PORTFOLIO TABLE (infinite scroll) -->
-  <div class="section-header">📋 PORTFOLIO HOLDINGS (scroll to load more)</div>
+  <!-- PORTFOLIO TABLE with fixed height + scroll -->
+  <div class="section-header">📋 PORTFOLIO HOLDINGS (scroll inside table, click "Load More")</div>
   <div class="table-wrapper" id="tableScrollWrapper">
     <table class="portfolio-table" id="portfolioTable">
       <thead><tr><th>Ticker</th><th>Alloc%</th><th>Name</th><th>Price</th><th>Day Chg</th><th>Mkt Cap</th><th>52W Chg</th><th>PE</th><th>FWD PE</th><th>Rev Growth</th><th>Earn Growth</th><th>Rec</th><th>PT Mean</th></tr></thead>
       <tbody id="portfolioTbody"></tbody>
     </table>
-    <div id="tableLoader" class="loading-spinner" style="display: none;">⟳ loading more stocks...</div>
   </div>
+  <button id="loadMoreBtn" class="load-more-btn">⟳ LOAD NEXT 10 TICKERS</button>
 
-  <!-- RICH DETAIL PANEL with cards & progress bar -->
+  <!-- RICH DETAIL PANEL -->
   <div class="detail-panel" id="detailPanel">
-    <!-- will be populated dynamically -->
+    <!-- populated on row click -->
   </div>
-  <div class="footnote">⚡ API calls in batches of 10 • Click any row for rich details • News from SPY feed</div>
+  <div class="footnote">⚡ marketCap from main_info.marketCap • revenue from growth.totalRevenue • fixed‑height table (400px) • load more keeps scroll position</div>
 </div>
 
 <script>
@@ -347,24 +367,15 @@
     const CARD_TICKERS = [...INDICES, ...ETFS];
 
     let globalDataMap = new Map();
-    let loadedTickersSet = new Set();
-    let isLoadingMore = false;
     let currentIndex = 0;
+    let isLoading = false;
     const BATCH_SIZE = 10;
 
-    // helper: safe number formatting
-    function toFixedSafe(val, digits=1) {
-      if (val === undefined || val === null) return "—";
-      let num = parseFloat(val);
-      return isNaN(num) ? "—" : num.toFixed(digits);
-    }
-
-    // extract data from API response (including news for SPY)
+    // extract data – using correct keys
     function extractData(apiItem) {
       if (!apiItem) return null;
       const main = apiItem.main_info || {};
       const trading = apiItem.trading_info || {};
-      const valuation = apiItem.valuation || {};
       const ratios = apiItem.ratios || {};
       const growth = apiItem.growth || {};
       const debt = apiItem.debt || {};
@@ -375,7 +386,7 @@
       const currentPrice = main.currentPrice ?? perf.currentPrice ?? null;
       let oneDayChange = main.oneDayChange ?? trading.oneDayChange ?? null;
       let fiftyTwoWeekChange = main.fiftyTwoWeekChange ?? perf["52WeekChange"] ?? null;
-      const marketCap = main.marketCap ?? valuation.marketCap ?? null;
+      const marketCap = main.marketCap ?? null;
       const pe = main.PE ?? ratios.trailingPE ?? null;
       const forwardPE = main.forwardPE ?? ratios.forwardPE ?? null;
       const recommendation = main.recommendation ?? priceTargets.recommendationKey ?? null;
@@ -412,43 +423,44 @@
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
         const arr = Array.isArray(data) ? data : [data];
-        return arr.map(item => extractData(item)).filter(d => d && d.ticker);
+        const parsed = arr.map(item => extractData(item)).filter(d => d && d.ticker);
+        for (const d of parsed) globalDataMap.set(d.ticker.toUpperCase(), d);
+        return parsed;
       } catch (err) {
         console.warn("Batch fetch error:", err);
         return [];
       }
     }
 
-    function mergeData(dataArray) {
-      for (const d of dataArray) {
-        if (d && d.ticker) globalDataMap.set(d.ticker.toUpperCase(), d);
-      }
-    }
-
-    // ---- NEWS SECTION (fetch SPY specifically) ----
+    // ---- NEWS from ^IXIC (extremely condensed) ----
     async function loadNews() {
-      const spyData = await fetchBatch(["SPY"]);
-      if (spyData.length && spyData[0].news && spyData[0].news.length) {
-        const newsItems = spyData[0].news.slice(0, 5);
-        let newsHtml = `<table class="news-table"><thead><tr><th>Title</th><th>Summary</th><th>Provider</th><th>Date</th></tr></thead><tbody>`;
-        for (let item of newsItems) {
+      const ixicData = await fetchBatch(["^IXIC"]);
+      const newsData = ixicData[0]?.news || [];
+      if (newsData.length) {
+        let newsHtml = "";
+        for (let item of newsData.slice(0, 5)) {
           const title = item.title || "—";
-          const summary = item.summary ? (item.summary.length > 80 ? item.summary.substring(0,80)+"…" : item.summary) : "—";
+          const summary = item.summary ? (item.summary.length > 100 ? item.summary.substring(0,100)+"…" : item.summary) : "";
           const provider = item.provider || "—";
-          const pubDate = item.pubDate ? new Date(item.pubDate).toLocaleString() : "—";
-          newsHtml += `<tr><td class="news-title"><a href="${item.source_url || '#'}" target="_blank">${title}</a></td><td>${summary}</td><td>${provider}</td><td>${pubDate}</td></tr>`;
+          const pubDate = item.pubDate ? new Date(item.pubDate).toLocaleString().slice(0,16) : "—";
+          newsHtml += `
+            <div class="news-line">
+              <span><a href="${item.source_url || '#'}" target="_blank">${title}</a></span>
+              <span class="news-provider">${provider}</span>
+              <span class="news-date">${pubDate}</span>
+              ${summary ? `<div class="news-summary">${summary}</div>` : ''}
+            </div>
+          `;
         }
-        newsHtml += `</tbody></table>`;
         document.getElementById("newsContent").innerHTML = newsHtml;
       } else {
-        document.getElementById("newsContent").innerHTML = `<div class="error-msg">No recent news available for SPY.</div>`;
+        document.getElementById("newsContent").innerHTML = `<div class="error-msg">No recent news for ^IXIC.</div>`;
       }
     }
 
     // ---- CARDS (indices & ETFs) ----
     async function loadCards() {
-      const cardData = await fetchBatch(CARD_TICKERS);
-      mergeData(cardData);
+      await fetchBatch(CARD_TICKERS);
       renderIndices();
       renderETFs();
     }
@@ -497,7 +509,7 @@
       container.innerHTML = html;
     }
 
-    // ---- PORTFOLIO TABLE (infinite scroll) ----
+    // ---- PORTFOLIO TABLE (fixed height, preserves scroll) ----
     function renderTableRow(ticker, data) {
       const alloc = allocationMap.get(ticker) || 0;
       const price = data.currentPrice ? `$${data.currentPrice.toFixed(2)}` : "--";
@@ -530,65 +542,61 @@
         <td>${earnGrowth}</td>
         <td class="${recClass}">${rec}</td>
         <td>${ptMean}</td>
-      </tr>`;
+       </tr>`;
     }
 
-    async function loadNextPortfolioBatch() {
-      if (isLoadingMore) return;
-      if (currentIndex >= ALL_TICKERS.length) return;
-      isLoadingMore = true;
-      const loader = document.getElementById("tableLoader");
-      loader.style.display = "block";
+    async function loadNextBatch() {
+      if (isLoading) return;
+      if (currentIndex >= ALL_TICKERS.length) {
+        const btn = document.getElementById("loadMoreBtn");
+        btn.disabled = true;
+        btn.innerText = "✓ ALL TICKERS LOADED";
+        return;
+      }
+      isLoading = true;
+      const btn = document.getElementById("loadMoreBtn");
+      const originalText = btn.innerText;
+      btn.innerText = "⟳ LOADING...";
+      btn.disabled = true;
       
       const batchTickers = ALL_TICKERS.slice(currentIndex, currentIndex + BATCH_SIZE);
-      const newData = await fetchBatch(batchTickers);
-      mergeData(newData);
+      await fetchBatch(batchTickers);
       
       const tbody = document.getElementById("portfolioTbody");
       for (let ticker of batchTickers) {
         const data = globalDataMap.get(ticker.toUpperCase());
         if (data) {
           tbody.insertAdjacentHTML('beforeend', renderTableRow(ticker, data));
-          loadedTickersSet.add(ticker);
         } else {
           tbody.insertAdjacentHTML('beforeend', `<tr data-ticker="${ticker}"><td>${ticker}</td><td colspan="12">data unavailable</td></tr>`);
         }
       }
       currentIndex += BATCH_SIZE;
-      isLoadingMore = false;
-      loader.style.display = "none";
-    }
-
-    function setupInfiniteScroll() {
-      const wrapper = document.getElementById("tableScrollWrapper");
-      wrapper.addEventListener("scroll", () => {
-        if (isLoadingMore) return;
-        const { scrollTop, scrollHeight, clientHeight } = wrapper;
-        if (scrollTop + clientHeight >= scrollHeight - 50) {
-          loadNextPortfolioBatch();
-        }
-      });
+      isLoading = false;
+      btn.innerText = "⟳ LOAD NEXT 10 TICKERS";
+      btn.disabled = false;
+      if (currentIndex >= ALL_TICKERS.length) {
+        btn.innerText = "✓ ALL TICKERS LOADED";
+        btn.disabled = true;
+      }
     }
 
     async function initPortfolioTable() {
       currentIndex = 0;
-      loadedTickersSet.clear();
       document.getElementById("portfolioTbody").innerHTML = "";
-      await loadNextPortfolioBatch();
-      setupInfiniteScroll();
+      await loadNextBatch(); // first 10 rows
+      document.getElementById("loadMoreBtn").addEventListener("click", loadNextBatch);
     }
 
-    // ---- RICH DETAIL PANEL with progress bar ----
+    // ---- DETAIL PANEL ----
     function updateDetailPanel(ticker) {
       const data = globalDataMap.get(ticker.toUpperCase());
       if (!data) return;
       const alloc = allocationMap.get(ticker) || 0;
-      // find max allocation for progress bar scaling
       let maxAlloc = 0;
       for (let val of allocationMap.values()) if (val > maxAlloc) maxAlloc = val;
       const allocPercent = (alloc / maxAlloc) * 100;
       
-      // compute price position relative to 52wk range for progress bar
       let priceRangePercent = 0;
       if (data.currentPrice && data.fiftyTwoWeekLow && data.fiftyTwoWeekHigh && data.fiftyTwoWeekHigh > data.fiftyTwoWeekLow) {
         priceRangePercent = ((data.currentPrice - data.fiftyTwoWeekLow) / (data.fiftyTwoWeekHigh - data.fiftyTwoWeekLow)) * 100;
@@ -610,22 +618,20 @@
           <div class="detail-main-value">${alloc.toFixed(2)}%</div>
           <div class="progress-container"><div class="progress-fill" style="width: ${allocPercent}%;"></div></div>
           <div class="metric-row"><span>Max Allocation</span><span>${maxAlloc.toFixed(2)}%</span></div>
-          <div class="metric-row"><span>Rank in Portfolio</span><span>#${[...allocationMap.entries()].sort((a,b)=>b[1]-a[1]).findIndex(([k])=>k===ticker)+1}</span></div>
+          <div class="metric-row"><span>Rank</span><span>#${[...allocationMap.entries()].sort((a,b)=>b[1]-a[1]).findIndex(([k])=>k===ticker)+1}</span></div>
         </div>
         <div class="detail-card">
-          <div class="detail-card-title">52‑WEEK PERFORMANCE</div>
+          <div class="detail-card-title">52‑WEEK</div>
           <div class="detail-main-value ${wk52Class}">${data.fiftyTwoWeekChange || "—"}</div>
           <div class="progress-container"><div class="progress-fill" style="width: ${priceRangePercent}%; background: #facc15;"></div></div>
-          <div class="metric-row"><span>52W Low</span><span>${data.fiftyTwoWeekLow ? `$${data.fiftyTwoWeekLow.toFixed(2)}` : "—"}</span></div>
-          <div class="metric-row"><span>52W High</span><span>${data.fiftyTwoWeekHigh ? `$${data.fiftyTwoWeekHigh.toFixed(2)}` : "—"}</span></div>
+          <div class="metric-row"><span>Low/High</span><span>${data.fiftyTwoWeekLow ? `$${data.fiftyTwoWeekLow.toFixed(2)}` : "—"} / ${data.fiftyTwoWeekHigh ? `$${data.fiftyTwoWeekHigh.toFixed(2)}` : "—"}</span></div>
         </div>
         <div class="detail-card">
           <div class="detail-card-title">FUNDAMENTALS</div>
           <div class="metric-row"><span>Revenue (TTM)</span><span>${data.revenue ? `$${(data.revenue/1e9).toFixed(2)}B` : "—"}</span></div>
           <div class="metric-row"><span>Revenue Growth</span><span>${(data.revenueGrowth !== null && !isNaN(data.revenueGrowth)) ? data.revenueGrowth.toFixed(1)+"%" : "—"}</span></div>
           <div class="metric-row"><span>Debt/Equity</span><span>${(data.debtToEquity !== null && !isNaN(data.debtToEquity)) ? data.debtToEquity.toFixed(2) : "—"}</span></div>
-          <div class="metric-row"><span>P/E (TTM)</span><span>${data.pe ?? "—"}</span></div>
-          <div class="metric-row"><span>Forward P/E</span><span>${data.forwardPE ?? "—"}</span></div>
+          <div class="metric-row"><span>P/E</span><span>${data.pe ?? "—"}</span></div>
         </div>
       `;
       document.getElementById("detailPanel").innerHTML = detailHtml;
@@ -646,8 +652,7 @@
     // ---- TAPE ----
     async function renderTape() {
       const tapeTickers = ["^IXIC","^GSPC","SPY","QQQ","NVDA","AAPL","GOOGL"];
-      const tapeData = await fetchBatch(tapeTickers);
-      mergeData(tapeData);
+      await fetchBatch(tapeTickers);
       let tapeHtml = "";
       for (let t of tapeTickers) {
         const d = globalDataMap.get(t.toUpperCase());
@@ -664,18 +669,22 @@
     // ---- INIT ----
     async function init() {
       document.getElementById("liveTimestamp").innerHTML = new Date().toUTCString().slice(0,25);
-      await loadNews();          // fetch SPY news
-      await loadCards();        // indices + ETFs
-      await renderTape();       // rolling tape
-      await initPortfolioTable(); // portfolio with infinite scroll
+      await loadNews();
+      await loadCards();
+      await renderTape();
+      await initPortfolioTable();
       attachRowClickHandler();
-      // select first row if any
-      const firstRow = document.querySelector("#portfolioTbody tr");
-      if (firstRow) {
-        const firstTicker = firstRow.getAttribute("data-ticker");
-        if (firstTicker) updateDetailPanel(firstTicker);
-        firstRow.classList.add("selected-row");
-      }
+      // select first row after initial batch loaded
+      const observer = new MutationObserver(() => {
+        const firstRow = document.querySelector("#portfolioTbody tr");
+        if (firstRow) {
+          const firstTicker = firstRow.getAttribute("data-ticker");
+          if (firstTicker) updateDetailPanel(firstTicker);
+          firstRow.classList.add("selected-row");
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.getElementById("portfolioTbody"), { childList: true, subtree: false });
     }
     init();
   })();
