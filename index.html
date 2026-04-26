@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>ΣΕΛΙΣ | TERMINAL | FIXED TABLE + LOAD MORE</title>
+  <title>ΣΕΛΙΣ | TERMINAL | CLEAN TABLE + COMPACT LOAD</title>
   <style>
     * {
       margin: 0;
@@ -62,12 +62,12 @@
       font-size: 0.8rem;
     }
 
-    /* rolling tape */
+    /* rolling tape for market data */
     .tape-container {
       background: #07131c;
       border-top: 1px solid #1f4b5e;
       border-bottom: 1px solid #1f4b5e;
-      margin-bottom: 28px;
+      margin-bottom: 16px;
       overflow: hidden;
       white-space: nowrap;
       position: relative;
@@ -91,42 +91,38 @@
     }
     .tape-container:hover .tape-track { animation-play-state: paused; }
 
-    /* NEWS – extremely condensed, simple lines */
-    .news-container {
-      background: #051018;
-      border: 1px solid #1f4b5e;
+    /* news tape – slower animation (120s) */
+    .news-tape-container {
+      background: #0a121c;
+      border-top: 1px solid #2c5f6e;
+      border-bottom: 1px solid #2c5f6e;
       margin-bottom: 28px;
-      padding: 6px 10px;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+      font-size: 0.75rem;
+      font-weight: 400;
     }
-    .news-header {
-      font-weight: 600;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      margin-bottom: 6px;
+    .news-tape-track {
+      display: inline-block;
+      white-space: nowrap;
+      animation: scrollNewsTape 120s linear infinite;
+      padding-right: 20px;
+    }
+    .news-tape-item {
+      display: inline-block;
+      margin-right: 2.5rem;
+      color: #b5e6e6;
+    }
+    .news-provider {
       color: #75aebf;
+      font-size: 0.7rem;
     }
-    .news-line {
-      font-size: 0.65rem;
-      border-bottom: 1px solid #1a2f3a;
-      padding: 4px 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: baseline;
+    @keyframes scrollNewsTape {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
-    .news-line a {
-      color: #9efff0;
-      text-decoration: none;
-    }
-    .news-line a:hover { color: #2dd4bf; }
-    .news-provider { color: #517f8c; }
-    .news-date { color: #3a6e7a; margin-left: auto; }
-    .news-summary {
-      width: 100%;
-      color: #8da4b0;
-      font-size: 0.6rem;
-      margin-top: 2px;
-    }
+    .news-tape-container:hover .news-tape-track { animation-play-state: paused; }
 
     .section-header {
       font-weight: 600;
@@ -187,7 +183,7 @@
       overflow-y: auto;
       background: #051018;
       border: 1px solid #1f4b5e;
-      margin: 20px 0 20px;
+      margin: 20px 0 8px 0;  /* reduced bottom margin */
     }
     .portfolio-table {
       width: 100%;
@@ -221,35 +217,32 @@
     .positive { color: #4ade80; }
     .negative { color: #f87171; }
 
-    /* WIDE & SMOOTH LOAD MORE BUTTON */
+    /* DISCREET LOAD MORE BUTTON – no border, condensed, less bold, reduced top margin */
     .load-more-btn {
-      background: #0f2838;
-      border: 1px solid #2c5f6e;
-      color: #b9f3f0;
-      padding: 10px 24px;
+      background: #0a1622;
+      color: #75aebf;
+      padding: 4px 16px;
       font-family: monospace;
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.7rem;
+      font-weight: 400;
       cursor: pointer;
-      margin: 0 auto 20px auto;
+      margin: 4px auto 20px auto;  /* reduced top margin */
       display: block;
-      width: 260px;
+      width: 160px;
       text-align: center;
       transition: all 0.2s;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
+      border: none;
     }
     .load-more-btn:hover {
-      background: #1f4b60;
-      border-color: #2dd4bf;
-      transform: scale(1.02);
+      background: #0f2838;
+      color: #b9f3f0;
     }
     .load-more-btn:disabled {
-      opacity: 0.5;
+      opacity: 0.4;
       cursor: not-allowed;
-      transform: none;
     }
 
-    /* detail panel */
     .detail-panel {
       background: #0a121c;
       border: 1px solid #2dd4bf;
@@ -307,16 +300,16 @@
 <body>
 <div class="dashboard">
   <div class="terminal-header">
-    <div class="logo-area"><div class="logo">ΣΕΛΙΣ // TERMINAL</div><div class="badge">FIXED TABLE • LOAD MORE</div></div>
+    <div class="logo-area"><div class="logo">ΣΕΛΙΣ // TERMINAL</div><div class="badge">CLEAN TABLE • COMPACT LOAD</div></div>
     <div class="time-panel" id="liveTimestamp">--:--:-- UTC</div>
   </div>
 
+  <!-- Market data rolling tape -->
   <div class="tape-container"><div class="tape-track" id="tapeTrack"></div></div>
 
-  <!-- ULTRA CONDENSED NEWS (no cards, minimal padding) -->
-  <div class="news-container" id="newsSection">
-    <div class="news-header">📰 ^IXIC · RAW NEWS FEED</div>
-    <div id="newsContent" class="loading-spinner" style="padding: 12px;">⟳ loading headlines...</div>
+  <!-- NEWS ROLLING TAPE (summary + provider) – slower -->
+  <div class="news-tape-container">
+    <div class="news-tape-track" id="newsTapeTrack">⟳ loading headlines...</div>
   </div>
 
   <!-- INDICES + VIX/DXY -->
@@ -325,21 +318,21 @@
   <!-- MARKET ETFs -->
   <div id="etfsSection"><div class="section-header">📈 MARKET ETFs</div><div id="etfsGrid" class="market-grid"><div class="loading-spinner">⟳ loading ETFs...</div></div></div>
 
-  <!-- PORTFOLIO TABLE with fixed height + scroll -->
+  <!-- PORTFOLIO TABLE -->
   <div class="section-header">📋 PORTFOLIO HOLDINGS (scroll inside table, click "Load More")</div>
   <div class="table-wrapper" id="tableScrollWrapper">
     <table class="portfolio-table" id="portfolioTable">
-      <thead><tr><th>Ticker</th><th>Alloc%</th><th>Name</th><th>Price</th><th>Day Chg</th><th>Mkt Cap</th><th>52W Chg</th><th>PE</th><th>FWD PE</th><th>Rev Growth</th><th>Earn Growth</th><th>Rec</th><th>PT Mean</th></tr></thead>
+      <thead>
+        <tr><th>Ticker</th><th>Alloc%</th><th>Name</th><th>Price</th><th>Day Chg</th><th>Mkt Cap</th><th>52W Chg</th><th>PE</th><th>FWD PE</th><th>Rev Growth</th><th>Earn Growth</th><th>Rec</th><th>PT Mean</th></tr>
+      </thead>
       <tbody id="portfolioTbody"></tbody>
     </table>
   </div>
-  <button id="loadMoreBtn" class="load-more-btn">⟳ LOAD NEXT 10 TICKERS</button>
+  <button id="loadMoreBtn" class="load-more-btn">⟳ LOAD NEXT 10</button>
 
-  <!-- RICH DETAIL PANEL -->
-  <div class="detail-panel" id="detailPanel">
-    <!-- populated on row click -->
-  </div>
-  <div class="footnote">⚡ marketCap from main_info.marketCap • revenue from growth.totalRevenue • fixed‑height table (400px) • load more keeps scroll position</div>
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="detailPanel"></div>
+  <div class="footnote">⚡ marketCap from main_info.marketCap • revenue from growth.totalRevenue • fixed‑height table (400px) • news summary + provider in rolling tape (slower)</div>
 </div>
 
 <script>
@@ -371,7 +364,6 @@
     let isLoading = false;
     const BATCH_SIZE = 10;
 
-    // extract data – using correct keys
     function extractData(apiItem) {
       if (!apiItem) return null;
       const main = apiItem.main_info || {};
@@ -432,33 +424,26 @@
       }
     }
 
-    // ---- NEWS from ^IXIC (extremely condensed) ----
-    async function loadNews() {
+    // ---- NEWS TAPE ----
+    async function loadNewsTape() {
       const ixicData = await fetchBatch(["^IXIC"]);
       const newsData = ixicData[0]?.news || [];
       if (newsData.length) {
-        let newsHtml = "";
-        for (let item of newsData.slice(0, 5)) {
-          const title = item.title || "—";
-          const summary = item.summary ? (item.summary.length > 100 ? item.summary.substring(0,100)+"…" : item.summary) : "";
-          const provider = item.provider || "—";
-          const pubDate = item.pubDate ? new Date(item.pubDate).toLocaleString().slice(0,16) : "—";
-          newsHtml += `
-            <div class="news-line">
-              <span><a href="${item.source_url || '#'}" target="_blank">${title}</a></span>
-              <span class="news-provider">${provider}</span>
-              <span class="news-date">${pubDate}</span>
-              ${summary ? `<div class="news-summary">${summary}</div>` : ''}
-            </div>
-          `;
+        let newsItems = [];
+        for (let item of newsData.slice(0, 8)) {
+          let summary = item.summary || item.title || "";
+          if (summary.length > 120) summary = summary.substring(0, 120) + "…";
+          const provider = item.provider || "Unknown";
+          newsItems.push(`${summary} <span class="news-provider">(${provider})</span>`);
         }
-        document.getElementById("newsContent").innerHTML = newsHtml;
+        const newsHtml = newsItems.map(text => `<span class="news-tape-item">${text}</span>`).join('');
+        document.getElementById("newsTapeTrack").innerHTML = newsHtml + newsHtml;
       } else {
-        document.getElementById("newsContent").innerHTML = `<div class="error-msg">No recent news for ^IXIC.</div>`;
+        document.getElementById("newsTapeTrack").innerHTML = `<span class="news-tape-item">📡 No recent headlines from ^IXIC</span>`;
       }
     }
 
-    // ---- CARDS (indices & ETFs) ----
+    // ---- CARDS ----
     async function loadCards() {
       await fetchBatch(CARD_TICKERS);
       renderIndices();
@@ -509,7 +494,7 @@
       container.innerHTML = html;
     }
 
-    // ---- PORTFOLIO TABLE (fixed height, preserves scroll) ----
+    // ---- PORTFOLIO TABLE (no stray characters) ----
     function renderTableRow(ticker, data) {
       const alloc = allocationMap.get(ticker) || 0;
       const price = data.currentPrice ? `$${data.currentPrice.toFixed(2)}` : "--";
@@ -528,6 +513,7 @@
       else if (rec.toLowerCase().includes("hold")) recClass = "recommend-hold";
       else if (rec.toLowerCase().includes("sell")) recClass = "recommend-sell";
       const ptMean = data.targetMean ? `$${data.targetMean.toFixed(2)}` : "—";
+      // clean template – no stray characters
       return `<tr data-ticker="${data.ticker}">
         <td>${data.ticker}</td>
         <td class="allocation-cell">${alloc.toFixed(2)}%</td>
@@ -542,7 +528,7 @@
         <td>${earnGrowth}</td>
         <td class="${recClass}">${rec}</td>
         <td>${ptMean}</td>
-       </tr>`;
+      </tr>`;
     }
 
     async function loadNextBatch() {
@@ -550,12 +536,11 @@
       if (currentIndex >= ALL_TICKERS.length) {
         const btn = document.getElementById("loadMoreBtn");
         btn.disabled = true;
-        btn.innerText = "✓ ALL TICKERS LOADED";
+        btn.innerText = "✓ ALL LOADED";
         return;
       }
       isLoading = true;
       const btn = document.getElementById("loadMoreBtn");
-      const originalText = btn.innerText;
       btn.innerText = "⟳ LOADING...";
       btn.disabled = true;
       
@@ -573,10 +558,10 @@
       }
       currentIndex += BATCH_SIZE;
       isLoading = false;
-      btn.innerText = "⟳ LOAD NEXT 10 TICKERS";
+      btn.innerText = "⟳ LOAD NEXT 10";
       btn.disabled = false;
       if (currentIndex >= ALL_TICKERS.length) {
-        btn.innerText = "✓ ALL TICKERS LOADED";
+        btn.innerText = "✓ ALL LOADED";
         btn.disabled = true;
       }
     }
@@ -584,7 +569,7 @@
     async function initPortfolioTable() {
       currentIndex = 0;
       document.getElementById("portfolioTbody").innerHTML = "";
-      await loadNextBatch(); // first 10 rows
+      await loadNextBatch();
       document.getElementById("loadMoreBtn").addEventListener("click", loadNextBatch);
     }
 
@@ -649,9 +634,9 @@
       });
     }
 
-    // ---- TAPE ----
+    // ---- MARKET TAPE (updated tickers) ----
     async function renderTape() {
-      const tapeTickers = ["^IXIC","^GSPC","SPY","QQQ","NVDA","AAPL","GOOGL"];
+      const tapeTickers = ["SPY", "QQQ", "GLD", "ARKK", "ARKX", "ARKG", "ICLN", "SMH"];
       await fetchBatch(tapeTickers);
       let tapeHtml = "";
       for (let t of tapeTickers) {
@@ -661,6 +646,8 @@
           const change = d.oneDayChange || "0%";
           const chgClass = parseFloat(change) >= 0 ? "positive" : "negative";
           tapeHtml += `<div class="tape-item"><span class="tape-symbol">${d.ticker}</span> <span class="tape-price">${price}</span> <span class="tape-change ${chgClass}">${change}</span></div>`;
+        } else {
+          tapeHtml += `<div class="tape-item"><span class="tape-symbol">${t}</span> <span class="tape-price">--</span> <span class="tape-change">--</span></div>`;
         }
       }
       document.getElementById("tapeTrack").innerHTML = tapeHtml + tapeHtml;
@@ -669,12 +656,11 @@
     // ---- INIT ----
     async function init() {
       document.getElementById("liveTimestamp").innerHTML = new Date().toUTCString().slice(0,25);
-      await loadNews();
+      await loadNewsTape();
       await loadCards();
       await renderTape();
       await initPortfolioTable();
       attachRowClickHandler();
-      // select first row after initial batch loaded
       const observer = new MutationObserver(() => {
         const firstRow = document.querySelector("#portfolioTbody tr");
         if (firstRow) {
