@@ -62,7 +62,6 @@
       font-size: 0.8rem;
     }
 
-    /* rolling tape for market data */
     .tape-container {
       background: #07131c;
       border-top: 1px solid #1f4b5e;
@@ -91,7 +90,6 @@
     }
     .tape-container:hover .tape-track { animation-play-state: paused; }
 
-    /* NEWS SECTION – grid of cards, 3 per row, muted grey border */
     .news-grid-container {
       background: #051018;
       border: 1px solid #2c5f6e;
@@ -172,7 +170,6 @@
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 12px;
     }
-    /* card with color coding for all indices + VIX + TNX */
     .card {
       background: #07101a;
       border: 1px solid #1f3c48;
@@ -316,26 +313,21 @@
     <div class="time-panel" id="liveTimestamp">--:--:-- UTC</div>
   </div>
 
-  <!-- Market rolling tape -->
   <div class="tape-container"><div class="tape-track" id="tapeTrack"></div></div>
 
-  <!-- NEWS GRID (3 from ^IXIC + 3 from ^GSPC) -->
   <div class="news-grid-container">
     <div class="news-header">📰 MARKET HEADLINES · NASDAQ & S&P 500</div>
     <div id="newsGrid" class="news-grid"><div class="loading-spinner">⟳ loading headlines...</div></div>
   </div>
 
-  <!-- MACRO section – two rows -->
   <div class="section-header">🌍 MACRO (VIX, DXY, 10Y, FOREX, GLOBAL ETFs)</div>
   <div class="macro-grid">
     <div class="macro-row" id="macroRow1"></div>
     <div class="macro-row" id="macroRow2"></div>
   </div>
   
-  <!-- MARKET ETFs (extended) -->
   <div id="etfsSection"><div class="section-header">📈 MARKET ETFs (incl. BOTZ, NUCL, SMH)</div><div id="etfsGrid" class="market-grid"><div class="loading-spinner">⟳ loading ETFs...</div></div></div>
 
-  <!-- PORTFOLIO TABLE -->
   <div class="section-header">📋 PORTFOLIO HOLDINGS (scroll inside table, click "Load More")</div>
   <div class="table-wrapper">
     <table class="portfolio-table">
@@ -345,7 +337,6 @@
   </div>
   <button id="loadMoreBtn" class="load-more-btn">⟳ LOAD NEXT 10</button>
 
-  <!-- DETAIL PANEL -->
   <div class="detail-panel" id="detailPanel"></div>
   <div class="footnote">⚡ VIX & TNX now use green/red background • News grid (3+3) with muted grey border • Macro row2 includes global ETFs</div>
 </div>
@@ -354,7 +345,6 @@
   (function(){
     const API_BASE = "https://mini-finapi.vercel.app/api/ticker";
 
-    // Portfolio allocation (128 stocks)
     const allocationRaw = [
       ["PL",6.44],["GOOGL",6.34],["RGTI",4.61],["MU",4.21],["RKLB",3.93],["AMZN",3.50],["OKLO",3.11],["INTC",2.86],["AAPL",2.52],["IBM",2.37],
       ["FIVE",2.19],["LUNR",2.18],["BKSY",1.77],["CRWV",1.63],["ASTS",1.61],["QBTS",1.49],["GSAT",1.49],["MRVL",1.30],["AMD",1.29],["IONQ",1.27],
@@ -371,7 +361,6 @@
     const allocationMap = new Map(allocationRaw);
     const ALL_TICKERS = allocationRaw.map(pair => pair[0]);
 
-    // MACRO row1: US indices + VIX + TNX (now color-coded)
     const MACRO_ROW1 = [
       { symbol: "^IXIC", name: "Nasdaq" },
       { symbol: "^GSPC", name: "S&P 500" },
@@ -380,7 +369,6 @@
       { symbol: "^VIX", name: "CBOE VIX" },
       { symbol: "^TNX", name: "10Y Yield" }
     ];
-    // MACRO row2: forex & global ETFs
     const MACRO_ROW2 = [
       { symbol: "EURUSD=X", name: "EUR/USD" },
       { symbol: "ILF", name: "South America ETF" },
@@ -390,7 +378,6 @@
       { symbol: "EWJ", name: "JAPAN ETF" }
     ];
 
-    // ETFs: original + BOTZ, NUCL, SMH
     const ETFS_BASE = ["TLT", "GLD", "BITO", "ARKK", "ARKX", "ARKG", "ICLN", "IGV", "MEME"];
     const ETFS_EXTRA = ["BOTZ", "NUCL", "SMH"];
     const ETFS = [...ETFS_BASE, ...ETFS_EXTRA];
@@ -455,7 +442,6 @@
       }
     }
 
-    // ---- NEWS GRID: 3 from ^IXIC + 3 from ^GSPC ----
     async function loadNewsGrid() {
       const [ixicData, gspcData] = await Promise.all([
         fetchBatch(["^IXIC"]),
@@ -486,7 +472,6 @@
       }
     }
 
-    // ---- MACRO rows rendering (VIX & TNX now color-coded like indices) ----
     function renderMacroRow(rowData, containerId) {
       const container = document.getElementById(containerId);
       let html = '';
@@ -500,7 +485,6 @@
         const change = d.oneDayChange || "0%";
         const changeNum = parseFloat(change);
         const chgClass = changeNum >= 0 ? "positive" : "negative";
-        // Determine card class: indices + VIX + TNX get green/red; others neutral
         let cardClass = "macro-neutral";
         const colorTickers = ["^IXIC","^GSPC","^DJI","^RUT","^VIX","^TNX"];
         if (colorTickers.includes(item.symbol)) {
@@ -515,7 +499,6 @@
       container.innerHTML = html;
     }
 
-    // ---- ETFs rendering ----
     async function loadETFs() {
       await fetchBatch(ETFS);
       const container = document.getElementById("etfsGrid");
@@ -537,7 +520,7 @@
       container.innerHTML = html;
     }
 
-    // ---- PORTFOLIO TABLE ----
+    // FIXED: removed stray character from table row
     function renderTableRow(ticker, data) {
       const alloc = allocationMap.get(ticker) || 0;
       const price = data.currentPrice ? `$${data.currentPrice.toFixed(2)}` : "--";
@@ -570,7 +553,7 @@
         <td>${earnGrowth}</td>
         <td class="${recClass}">${rec}</td>
         <td>${ptMean}</td>
-      税<td>`;
+      </tr>`;
     }
 
     async function loadNextBatch() {
@@ -614,7 +597,6 @@
       document.getElementById("loadMoreBtn").addEventListener("click", loadNextBatch);
     }
 
-    // ---- DETAIL PANEL ----
     function updateDetailPanel(ticker) {
       const data = globalDataMap.get(ticker.toUpperCase());
       if (!data) return;
@@ -667,7 +649,6 @@
       });
     }
 
-    // ---- MARKET TAPE ----
     async function renderTape() {
       const tapeTickers = ["SPY", "QQQ", "GLD", "ARKK", "ARKX", "ARKG", "ICLN", "SMH"];
       await fetchBatch(tapeTickers);
@@ -686,7 +667,6 @@
       document.getElementById("tapeTrack").innerHTML = tapeHtml + tapeHtml;
     }
 
-    // ---- LOAD ALL MACRO & ETF DATA ----
     async function loadMacroAndETFs() {
       const allMacroEtf = [...ALL_MACRO_TICKERS, ...ETFS];
       await fetchBatch(allMacroEtf);
@@ -695,13 +675,12 @@
       await loadETFs();
     }
 
-    // ---- INIT ----
     async function init() {
       document.getElementById("liveTimestamp").innerHTML = new Date().toUTCString().slice(0,25);
-      await loadNewsGrid();         // grid of 6 news cards
-      await loadMacroAndETFs();     // macro rows + ETFs
-      await renderTape();           // market tape
-      await initPortfolioTable();   // portfolio table
+      await loadNewsGrid();
+      await loadMacroAndETFs();
+      await renderTape();
+      await initPortfolioTable();
       attachRowClickHandler();
       const observer = new MutationObserver(() => {
         const firstRow = document.querySelector("#portfolioTbody tr");
